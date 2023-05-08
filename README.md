@@ -16,6 +16,7 @@ The interpreter will then execute the appropriate command and provide feedback b
 To start the interpreter, navigate to the directory containing the console.py file and run the following command in your terminal:
 > *python3 console.py*
 >> *or*
+
 > *./console.py*
 
 
