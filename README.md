@@ -31,17 +31,17 @@ The interpreter will then execute the appropriate command and provide feedback b
 To exit the interpreter, simply enter the **exit** command.
 
 ## Examples:
-> *create BaseModel* \# Creates a new instance of BaseModel, saves it (to the JSON file) and prints the id.
+> <u>create BaseModel</u> \# Creates a new instance of BaseModel, saves it (to the JSON file) and prints the id.
 
 
-> *show BaseModel 1234-1234-1234* \# Prints the string representation of an instance based on the class name and id."
+> <u>how BaseModel 1234-1234-1234</u> \# Prints the string representation of an instance based on the class name and id."
 
 
-> *update BaseModel 1234-1234-1234 email "aibnb@mail.com"* \# Updates an instance based on the class name and id by adding or updating attribute.
+> <u>update BaseModel 1234-1234-1234 email "aibnb@mail.com"</u> \# Updates an instance based on the class name and id by adding or updating attribute.
 
 
-> *destroy BaseModel 1234-1234-1234* \# Deletes an instance based on the class name and id.
+> <u>destroy BaseModel 1234-1234-1234</u> \# Deletes an instance based on the class name and id.
 
 
-> *all BaseModel* \# Prints all string representation of all instances based or not on the class name.
+> <u>all BaseModel</u> \# Prints all string representation of all instances based or not on the class name.
 
