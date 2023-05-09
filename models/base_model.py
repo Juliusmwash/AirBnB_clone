@@ -9,7 +9,7 @@ import models
 
 class BaseModel():
     """
-    A base class for other sub  model
+    A base class for other sub model
     """
 
     def __init__(self, *arg, **kwargs):
@@ -40,8 +40,8 @@ class BaseModel():
 
     def save(self) -> None:
         """
-        make changes to the and update the public instance
-        attribute updated_at with the
+        make changes and updates the public instance
+        attribute 'updated_at' with the
         current datetime
         """
         self.updated_at = datetime.now()
