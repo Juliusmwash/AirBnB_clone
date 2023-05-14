@@ -43,7 +43,9 @@ class TestHBNBCommand_help(unittest.TestCase):
             self.assertEqual(h, output.getvalue().strip())
 
     def test_help_create(self):
-        h = ("Creates a new instance of BaseModel,\n        saves it (to the JSON file) and prints the id.\n        Usage: <class name>.create()\n               create <class name>")
+        h = ("Creates a new instance of BaseModel,\n        saves \
+it (to the JSON file) and prints the id.\n        Usage: \
+<class name>.create()\n               create <class name>")
 
         with patch("sys.stdout", new=StringIO()) as output:
             self.assertFalse(HBNBCommand().onecmd("help create"))
@@ -56,32 +58,48 @@ class TestHBNBCommand_help(unittest.TestCase):
             self.assertEqual(h, output.getvalue().strip())
 
     def test_help_show(self):
-        h = ("Prints the string representation of an\n        instance based on the class name and id.\n        Usage: <class name>.show(<id>)\n               show <class name> <id>")
+        h = ("Prints the string representation of an\n        instance \
+based on the class name and id.\n        Usage: \
+<class name>.show(<id>)\n               show <class name> <id>")
 
         with patch("sys.stdout", new=StringIO()) as output:
             self.assertFalse(HBNBCommand().onecmd("help show"))
             self.assertEqual(h, output.getvalue().strip())
 
     def test_help_destroy(self):
-        h = ("Deletes an instance based on the class name\n        and id (save the change into the JSON file).\n        Usage: <class name>.destroy(<id>)\n               destroy <class name> <id>")
+        h = ("Deletes an instance based on the class name\n        and \
+id (save the change into the JSON file).\n        Usage: \
+<class name>.destroy(<id>)\n               destroy \
+<class name> <id>")
         with patch("sys.stdout", new=StringIO()) as output:
             self.assertFalse(HBNBCommand().onecmd("help destroy"))
             self.assertEqual(h, output.getvalue().strip())
 
     def test_help_all(self):
-        h = ("Prints all string representations of\n        instances of a class if no argument is given\n        else prints string representation of instances\n        of the given class\n        Usage: <all>\n               <class name>.all()")
+        h = ("Prints all string representations of\n        instances \
+of a class if no argument is given\n        else prints \
+string representation of instances\n        of the given \
+class\n        Usage: <all>\n               <class name>.all()")
         with patch("sys.stdout", new=StringIO()) as output:
             self.assertFalse(HBNBCommand().onecmd("help all"))
             self.assertEqual(h, output.getvalue().strip())
 
     def test_help_count(self):
-        h = ("Counts the number of instances of a class\n        Usage: count <class name>\n               <class name>.count()")
+        h = ("Counts the number of instances of a class\n        Usage: \
+count <class name>\n               <class name>.count()")
         with patch("sys.stdout", new=StringIO()) as output:
             self.assertFalse(HBNBCommand().onecmd("help count"))
             self.assertEqual(h, output.getvalue().strip())
 
     def test_help_update(self):
-        h = ("Updates an instance based on the class name and\n        id by adding or updating attribute (save the\n        change into the JSON file)\n        Usage: update <class name> <id> <attribute name> \"<attribute value>\"\n               <class name>.update(<id>, <attribute name>, \"<attribute value>\")")
+        h = ("Updates an instance based on the class name and\n        id \
+by adding or updating attribute (save the\n        change \
+into the JSON file)\n        Usage: update <class name> <id> \
+<attribute name> \"<attribute value>\"\n               <class \
+name>.update(<id>, <attribute name>, \"<attribute \
+value>\")\n               <class name> <id> <dictionary \
+representation>\n               <class name>.update(<id>, \
+<dictionary representation>")
         with patch("sys.stdout", new=StringIO()) as output:
             self.assertFalse(HBNBCommand().onecmd("help update"))
             self.assertEqual(h, output.getvalue().strip())
