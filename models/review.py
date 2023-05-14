@@ -1,17 +1,21 @@
 #!/usr/bin/python3
 """
-Module:  Class Review
+Module for class Review
 """
+from models import storage
 from models.base_model import BaseModel
 
 
 class Review(BaseModel):
-    """  model to create reviews on the website
-    Attributes:
-        text
-        user_id
-        place_id
+    """
+    Class for reviews
     """
     place_id = ""
     user_id = ""
     text = ""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Instanciates class Review
+        """
+        super().__init__(*args, **kwargs)

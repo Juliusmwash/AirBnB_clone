@@ -1,14 +1,19 @@
 #!/usr/bin/python3
 """
-Module: Class amenity
+module for class Amenity
 """
+from models import storage
 from models.base_model import BaseModel
 
 
 class Amenity(BaseModel):
-    """Amenity model for places to be used
-
-    Attributes:
-        name
+    """
+    Stores the amenity details
     """
     name = ""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Instanciates class Amenity
+        """
+        super().__init__(*args, **kwargs)
