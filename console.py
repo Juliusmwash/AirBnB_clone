@@ -1,243 +1,349 @@
 #!/usr/bin/python3
-'''
-Module: the console.py
-'''
-
+"""
+console module
+"""
 import cmd
-from models import storage
 import re
+import sys
 import json
+from shlex import split
+# from models import base_model
+# from models import user
+from models import storage
 from models.base_model import BaseModel
 from models.user import User
+from models.place import Place
+from models.amenity import Amenity
+from models.review import Review
 from models.state import State
 from models.city import City
-from models.review import Review
-from models.amenity import Amenity
-from models.place import Place
 
 
 class HBNBCommand(cmd.Cmd):
-    '''defines entry point of the command interpreter'''
-    prompt = "(hbnb)"
-    model_classes = {
-            'BaseModel': BaseModel, 'User': User,
-            'Amenity': Amenity, 'City': City, 'State': State,
-            'Place': Place, 'Review': Review
-            }
+    """
+    Creates the console interpreter for AirBnB project
+    """
+    prompt = '(hbnb) '
+
+    def type_parser(self, token):
+        """
+        Returns the attribute value according to the given type
+        """
+        if token.isalpha():
+            return str(token)
+        if token.isdigit():
+            return int(token)
+        if re.search('[a-zA-Z]', token) and re.search('[0-9]', token):
+            return str(token)
+        if (token.startswith("'") and token.endswith("'")):
+            word = token.strip("'")
+            return str(word)
+        if (token.startswith('"') and token.endswith('"')):
+            word = token.strip('"')
+            return str(word)
+        if '.' in token:
+            return float(token)
+        return token
+
+    def update_dictionary_loader(self, token):
+        """
+        Checks if a dictionary has been passed as an
+        argument to the update method.
+        If true adds the data to the object.
+        Else the update method continues with the operation
+        """
+        if '{' in token and '}' in token:
+            args = token.split(' ', maxsplit=2)
+            dict_str = args[2].replace("'", '"')
+            tmp_dict = json.loads(dict_str)
+
+            try:
+                my_class = globals()[args[0]]
+            except Exception:
+                print("** class name missing **")
+            try:
+                classname = getattr(my_class, '__name__')
+            except Exception:
+                print("** class doesn't exist **")
+                return
+
+            key1 = classname + '.' + args[1]
+            for key, obj in storage.all().items():
+                if key == key1:
+                    for key, value in tmp_dict.items():
+                        key_str = str(key)
+                        attr_val = value
+                        setattr(obj, key_str, attr_val)
+                    storage.save()
+                    storage.reload()
+                    break
+            return True
+        return False
+
+    def add_quotes(self, token):
+        """
+        Protects the token's type from being altered
+        (by the type_parser class method) if called from
+        the Default class method
+        """
+        if type(token) == str:
+            if token.isdigit():
+                word = '"' + token + '"'
+                return word
+            if re.match(r'^\d+\.\d+$', token):
+                word = '"' + token + '"'
+                return word
+        return token
 
     def do_quit(self, arg):
-        """ Quit command to exit the program """
+        """
+        Quit command to exit the program
+        """
         return True
 
     def do_EOF(self, arg):
-        ''' close program and save the program
-        using CTRL + D
-        '''
-        print("")
+        """
+        EOF signal to exit the program
+        """
         return True
 
-    def do_help(self, arg):
-        '''help center command '''
-        return super().do_help(arg)
-
     def emptyline(self):
-        """define an empty function"""
+        """
+        An empty line + ENTER shouldn’t execute anything
+        """
         pass
 
     def do_create(self, arg):
-        '''Creates a new instance of the BaseModel and
-        saves it (to the JSON file) then prints the id.
-        Ex: $ create BaseModel
-        '''
-        tokens = arg.split()
-        if not HBNBCommand.validator(tokens, check_id=False):
+        """
+        Creates a new instance of BaseModel,
+        saves it (to the JSON file) and prints the id.
+        Usage: <class name>.create()
+               create <class name>
+        """
+        if not arg:
+            print("** class name missing **")
             return
-        obj = HBNBCommand.model_classes[tokens[0]]()
+        args = arg.split()
+        if hasattr(sys.modules[__name__], args[0]):
+            cls = getattr(sys.modules[__name__], args[0])
+        else:
+            print("** class doesn't exist **")
+            return
+
+        obj = cls()
         obj.save()
+        storage.reload()
         print(obj.id)
 
     def do_show(self, arg):
-        '''
+        """
         Prints the string representation of an
         instance based on the class name and id.
-        Ex: $ show BaseModel 1234-1234-1234.
-        '''
-        tokens = arg.split()
-        if not HBNBCommand.validator(tokens, check_id=True):
-            return
-        storage.reload()
-        objs = storage.all()
-        key = "{}.{}".format(tokens[0], tokens[1])
-        obj_instance = objs.get(key, None)
-        if obj_instance is None:
-            print("** no instance found **")
-            return
-        print(obj_instance)
-
-    def do_destroy(self, arg):
-        '''
-        Deletes an instance based on the class name
-        and id (save the change into the JSON file).
-        Ex: $ destroy BaseModel 1234-1234-1234
-        '''
-        tokens = arg.split()
-        if not HBNBCommand.validator(tokens, check_id=True):
-            return
-        storage.reload()
-        objs = storage.all()
-        key = "{}.{}".format(tokens[0], tokens[1])
-        obj_instance = objs.get(key, None)
-        if obj_instance is None:
-            print("** no instance found **")
-            return
-        del objs[key]
-        storage.save()
-
-    def do_all(self, arg):
-        '''
-        Prints all string representation of all instances
-        based or not on the class name.
-        Ex: $ all BaseModel or $ all
-        '''
-        tokens = arg.split()
-        storage.reload()
-        objs = storage.all()
-        if len(tokens) < 1:
-            print(["{}".format(str(v)) for _, v in objs.items()])
-            return
-        if tokens[0] not in HBNBCommand.model_classes.keys():
-            print("** class does not exist **")
-            return
-        else:
-            print(["{}".format(str(v))
-                  for _, v in objs.items() if type(v).__name__ == tokens[0]])
-            return
-
-    def do_update(self, arg):
-        tokens = arg.split()
-        if not HBNBCommand.validator(tokens, check_id=True):
-            return
-        storage.reload()
-        objs = storage.all()
-        key = "{}.{}".format(tokens[0], tokens[1])
-        obj_instance = objs.get(key, None)
-        if obj_instance is None:
-            print("** no instance found **")
-            return
-
-        matcher = re.findall(r"{.*}", arg)
-        if matcher:
-            payload = None
-            try:
-                payload: dict = json.loads(matcher[0])
-            except Exception:
-                print("** invalid syntax")
-                return
-            for k, v in payload.items():
-                setattr(obj_instance, k, v)
-            storage.save()
-            return
-
-        if not HBNBCommand.validate_attrs(tokens):
-            return
-        finder = re.findall(r"^[\"\'](.*?)[\"\']", tokens[3])
-        if finder:
-            setattr(obj_instance, tokens[2], finder[0])
-        else:
-            vals = tokens[3].split()
-            setattr(obj_instance, tokens[2], HBNBCommand.parse_str(vals[0]))
-        storage.save()
-
-    def precmd(self, arg):
-        """
-        Instructions to execute before arguments are interpreted
+        Usage: <class name>.show(<id>)
+               show <class name> <id>
         """
         if not arg:
-            return '\n'
+            print("** class name missing **")
+            return
 
-        pattern = re.compile(r"(\w+)\.(\w+)\((.*)\)")
-        match_list = pattern.findall(arg)
-        if not match_list:
-            return super().precmd(arg)
-
-        matcher = match_list[0]
-        if not matcher[2]:
-            if matcher[1] == "count":
-                instance_objs = storage.all()
-                print(len([
-                    v for _, v in instance_objs.items()
-                    if type(v).__name__ == matcher[0]]))
-                return "\n"
-            return "{} {}".format(matcher[1], matcher[0])
-        else:
-            args = matcher[2].split(", ")
-            if len(args) == 1:
-                return "{} {} {}".format(
-                    matcher[1], matcher[0],
-                    re.sub("[\"\']", "", matcher[2]))
-            else:
-                json_match = re.findall(r"{.*}", matcher[2])
-                if (json_match):
-                    return "{} {} {} {}".format(
-                        matcher[1], matcher[0],
-                        re.sub("[\"\']", "", args[0]),
-                        re.sub("\'", "\"", json_match[0]))
-                return "{} {} {} {} {}".format(
-                    matcher[1], matcher[0],
-                    re.sub("[\"\']", "", args[0]),
-                    re.sub("[\"\']", "", args[1]), args[2])
-
-    def validate_attrs(tokens):
-        """ validate the classname attributes and the values."""
-        if len(tokens) < 3:
-            print("** attribute name is missing **")
-            return False
-        if len(tokens) < 4:
-            print("** value is not found **")
-            return False
-        return True
-
-    def validator(tokens, check_id=False):
-        '''validate the class entry'''
-        if not tokens:
-            print("* class name is not found **")
-            return False
-        if tokens[0] not in HBNBCommand.model_classes.keys():
+        args = arg.split()
+        try:
+            my_class = globals()[args[0]]
+            classname = getattr(my_class, '__name__')
+        except Exception:
             print("** class doesn't exist **")
-            return False
-        if len(tokens) < 2 and check_id:
-            print("** instance id is not found **")
-            return False
-        return True
+            return
 
-    def parse_str(token):
-        """Parse token to str or int or float"""
-        parsed = re.sub("\"", "", token)
-        if HBNBCommand.is_int(parsed):
-            return int(parsed)
-        elif HBNBCommand.is_float(parsed):
-            return float(parsed)
-        else:
-            return token
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
 
-    def is_float(tok):
-        """Checks tok is floating number"""
+        obj_id = args[1]
+        key1 = classname + '.' + obj_id
+        if key1 not in storage.all():
+            print("** no instance found **")
+            return
+        for key, value in storage.all().items():
+            if key == key1:
+                obj = value
+                print(obj)
+
+    def do_destroy(self, arg):
+        """
+        Deletes an instance based on the class name
+        and id (save the change into the JSON file).
+        Usage: <class name>.destroy(<id>)
+               destroy <class name> <id>
+        """
+        if not arg:
+            print("** class name missing **")
+            return
+
+        args = arg.split()
         try:
-            x = float(tok)
-        except (TypeError, ValueError):
-            return False
-        else:
-            return True
+            my_class = globals()[args[0]]
+            classname = getattr(my_class, '__name__')
+        except Exception:
+            print("** class doesn't exist **")
+            return
 
-    def is_int(tok):
-        """Checks that tok is integer value"""
-        try:
-            x = float(tok)
-            y = int(x)
-        except (TypeError, ValueError):
-            return False
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+
+        obj_id = args[1]
+        key1 = classname + '.' + obj_id
+        if key1 not in storage.all():
+            print("** no instance found **")
+            return
+        for key, obj in storage.all().items():
+            if key == key1:
+                del storage.all()[key]
+                storage.save()
+                storage.reload()
+                break
+
+    def do_all(self, line):
+        """
+        Prints all string representations of
+        instances of a class if no argument is given
+        else prints string representation of instances
+        of the given class
+        Usage: <all>
+               <class name>.all()
+        """
+        class_name = line.strip()
+        objects = storage.all()
+        if not class_name:
+            obj_list = [str(obj) for obj in objects.values()]
+            print(obj_list)
         else:
-            return x == y
+            try:
+                my_class = globals()[class_name]
+                classname = getattr(my_class, '__name__')
+            except Exception:
+                print("** class doesn't exist **")
+                return
+            print([
+                str(obj)
+                for obj in objects.values()
+                if obj.__class__.__name__ == class_name
+                ])
+
+    def do_update(self, arg):
+        """
+        Updates an instance based on the class name and
+        id by adding or updating attribute (save the
+        change into the JSON file)
+        Usage: update <class name> <id> <attribute name> "<attribute value>"
+               <class name>.update(<id>, <attribute name>, "<attribute value>")
+        """
+        if not arg:
+            print("** class name missing **")
+            return
+        if self.update_dictionary_loader(arg):
+            return
+        args = arg.split()
+        try:
+            my_class = globals()[args[0]]
+            classname = getattr(my_class, '__name__')
+        except Exception:
+            print("** class doesn't exist **")
+            return
+        if len(args) < 2:
+            print("** instance id missing **")
+            return
+        obj_id = args[1]
+        key1 = classname + '.' + obj_id
+        if key1 not in storage.all():
+            print("** no instance found **")
+            return
+        if len(args) < 3:
+            print("** attribute name missing **")
+            return
+        if len(args) < 4:
+            print("** value missing **")
+            return
+        for key, obj in storage.all().items():
+            if key == key1:
+                new_value = self.type_parser(args[3])
+                setattr(obj, args[2], new_value)
+                storage.save()
+                storage.reload()
+                break
+
+    def do_count(self, arg):
+        """
+        Counts the number of instances of a class
+        Usage: count <class name>
+               <class name>.count()
+        """
+        storage.reload()
+        if not arg:
+            print("** class name missing **")
+            return
+
+        args = arg.split()
+        try:
+            my_class = globals()[args[0]]
+            classname = getattr(my_class, '__name__')
+        except Exception:
+            print("0")
+            return
+        objects = storage.all()
+        count = 0
+        for key in objects.keys():
+            if args[0] in key:
+                count += 1
+        print("{}".format(count))
+
+    def default(self, arg):
+        """
+        Default behavior for cmd module when input is invalid
+        """
+        argdict = {
+                "create": self.do_create,
+                "all": self.do_all,
+                "show": self.do_show,
+                "destroy": self.do_destroy,
+                "count": self.do_count,
+                "update": self.do_update
+                }
+        match = re.search(r"\.", arg)
+        if match is not None:
+            argl = [arg[:match.span()[0]], arg[match.span()[1]:]]
+            match = re.search(r"\((.*?)\)", argl[1])
+            if not argl[0] and argl[1] != "all()":
+                print("** class name missing **")
+                return
+            if match is not None:
+                command = [argl[1][:match.span()[0]], match.group()[1:-1]]
+                if command[0] == 'update' and \
+                        '{' in command[1] and \
+                        '}' in command[1]:
+                    cmd_str = command[1].split(', ', maxsplit=1)
+                    dict_str = cmd_str[1].replace("'", "\"")
+                    try:
+                        d_dict = json.loads(dict_str)
+                    except Exception:
+                        return
+                    for key, value in d_dict.items():
+                        k_str = str(key)
+                        v_str = self.add_quotes(value)
+                        call = "{} {} {} {}".format(
+                                argl[0], cmd_str[0],
+                                k_str, v_str
+                                )
+                        argdict[command[0]](call)
+                    return
+
+                elif command[0] in argdict.keys():
+                    call = "{} {}".format(argl[0], command[1])
+                    call = re.sub(r',', '', call)
+                    return argdict[command[0]](call)
+
+        print("*** Unknown syntax: {}".format(arg))
+        return False
 
 
 if __name__ == '__main__':
