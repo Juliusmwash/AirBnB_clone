@@ -235,8 +235,10 @@ class HBNBCommand(cmd.Cmd):
         Updates an instance based on the class name and
         id by adding or updating attribute (save the
         change into the JSON file)
-        Usage: update <class name> <id> <attribute name> "<attribute value>"
-               <class name>.update(<id>, <attribute name>, "<attribute value>")
+        Usage: update <class name> <id> <attribute name> <attribute value>
+               <class name>.update(<id>, <attribute name>, <attribute value>)
+               <class name> <id> <dictionary representation>
+               <class name>.update(<id>, <dictionary representation>
         """
         if not arg:
             print("** class name missing **")
