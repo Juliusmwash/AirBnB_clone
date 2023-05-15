@@ -95,9 +95,9 @@ count <class name>\n               <class name>.count()")
         h = ("Updates an instance based on the class name and\n        id \
 by adding or updating attribute (save the\n        change \
 into the JSON file)\n        Usage: update <class name> <id> \
-<attribute name> \"<attribute value>\"\n               <class \
-name>.update(<id>, <attribute name>, \"<attribute \
-value>\")\n               <class name> <id> <dictionary \
+<attribute name> <attribute value>\n               <class \
+name>.update(<id>, <attribute name>, <attribute \
+value>)\n               <class name> <id> <dictionary \
 representation>\n               <class name>.update(<id>, \
 <dictionary representation>")
         with patch("sys.stdout", new=StringIO()) as output:
