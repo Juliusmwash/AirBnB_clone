@@ -1,0 +1,87 @@
+.main {
+	display: flex;
+	justify-content: center;
+	width: 1000px;
+	height: 1000px;
+	border:2px solid gray;
+	margin: 0;
+}
+.parent {
+	display: block;
+	height: 70px;
+	width: 600px;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	background-color: red;
+	border: 5px solid gray;
+  position: relative; /* Required for child's absolute positioning */
+  /* Other parent styles */
+}
+/*
+.child {
+  background-color: lime;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+*/
+.parent .child {
+	float: left;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	background: lime;
+	border-right: 2px solid gray;
+	border-radius: 15px;
+	width: 30%;
+	height: 100%;
+}
+.parent .child2 {
+	float: left;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	background: cyan;
+	border-radius: 15px;
+	width: 30%;
+	height: 100%;
+}
+.parent .child h3,
+.parent .child2 h3,
+.parent .child h4,
+.parent .child2 h4 {
+	font-size: 12px;
+	margin: 0;
+	margin-left: 20px;
+}
+.parent .search {
+	border: none;
+	background: blue;
+	float: right;
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+	margin-right: 10px;
+	align-items: center;
+	border-radius: 8px;
+	width: 30%;
+	height: 60%;
+}
+.clearfix::after {
+	content: "";
+	display: table;
+	clear: both;
+}
+p {
+	margin: 0;
+}
+.parent2 {
+	display: flex;
+	justify-content: flex-start;
+	margin-left: 20px;
+	margin-top: 30px;
+	height: 70px;
+	width: 600px;
+	background: green;
+	border:5px solid gray;
+}
